@@ -1,1 +1,7 @@
-{"description": "Hide minimized in overview", "uuid": "hide-minimized@danigm.net", "name": "Hide minimized", "shell-version": ["3.30", "3.32", "3.34", "3.36"]}
+{
+    "description": "Hide minimized in overview",
+    "uuid": "hide-minimized@danigm.net",
+    "name": "Hide minimized",
+    "url": "https://github.com/danigm/hide-minimized",
+    "shell-version": ["3.30", "3.32", "3.34", "3.36", "3.38"]
+}
