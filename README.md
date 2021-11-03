@@ -9,7 +9,7 @@ You can install this extension from https://extensions.gnome.org
 Or you can do it by hand, downloading this repository to your local shell extensions folder:
 
 ```bash
-cd ~/.local/share/gnome-shell/extensions`
+cd ~/.local/share/gnome-shell/extensions
 git cloone https://github.com/danigm/hide-minimized.git
 mv hide-minimized hide-minimized@danigm.net
 ```
