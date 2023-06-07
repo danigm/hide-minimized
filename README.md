@@ -4,7 +4,7 @@ This is a gnome shell extension to hide minimized windows in overview
 
 ## How to install:
 
-You can install this extension from https://extensions.gnome.org
+You can install this extension from [https://extensions.gnome.org](https://extensions.gnome.org/extension/2639/hide-minimized/)
 
 Or you can do it by hand, downloading this repository to your local shell extensions folder:
 
