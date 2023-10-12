@@ -1,33 +1,29 @@
-const Config = imports.misc.config;
-const [major] = Config.PACKAGE_VERSION.split('.');
-const shellVersion = Number.parseInt(major);
+import { Workspace } from 'resource:///org/gnome/shell/ui/workspace.js'
+// import * as AltTab from 'resource:///org/gnome/shell/ui/altTab.js'
+// import { UIWindowSelector, UIWindowSelectorWindow } from 'resource:///org/gnome/shell/ui/screenshot.js'
+// import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-const isOverviewWindow = imports.ui.workspace.Workspace.prototype._isOverviewWindow;
-const { Workspace } = imports.ui.workspace;
-const { altTab } = imports.ui;
-const { getWindows } = altTab;
-if(shellVersion >= 42) {
-  var capture = imports.ui.screenshot.UIWindowSelector.prototype.capture;
-  var { UIWindowSelector, UIWindowSelectorWindow } = imports.ui.screenshot;
-  var Main = imports.ui.main;
-}
+const isOverviewWindow = Workspace.prototype._isOverviewWindow;
+// const getWindows = AltTab.getWindows;
+// const capture = UIWindowSelector.prototype.capture;
 
-function init() {
-}
+export default class HideMinimized{
+  constructor() {
+  }
 
-function enable() {
-  Workspace.prototype._isOverviewWindow = (win) => {
-    const show = isOverviewWindow(win);
-    let meta = win;
-    if (win.get_meta_window)
-      meta = win.get_meta_window()
-    return show && !meta.minimized;
-  };
-  altTab.getWindows = (workspace) => {
-    const windows = getWindows(workspace);
-    return windows.filter((w, i, a) => !w.minimized);
-  };
-  if(shellVersion >= 42) {
+  enable() {
+    Workspace.prototype._isOverviewWindow = (win) => {
+      const show = isOverviewWindow(win);
+      let meta = win;
+      if (win.get_meta_window)
+        meta = win.get_meta_window()
+      return show && !meta.minimized;
+    };
+    /*
+    AltTab.getWindows = (workspace) => {
+      const windows = getWindows(workspace);
+      return windows.filter((w, i, a) => !w.minimized);
+    };
     // Patched version of original function from:
     // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/ui/screenshot.js
     UIWindowSelector.prototype.capture = function() {
@@ -64,13 +60,12 @@ function enable() {
         this._layoutManager.addWindow(widget);
       }
     };
+    */
   }
-}
 
-function disable() {
-  Workspace.prototype._isOverviewWindow = isOverviewWindow;
-  altTab.getWindows = getWindows;
-  if(shellVersion >= 42) {
-    UIWindowSelector.prototype.capture = capture;
+  disable() {
+    Workspace.prototype._isOverviewWindow = isOverviewWindow;
+    // AltTab.getWindows = getWindows;
+    // UIWindowSelector.prototype.capture = capture;
   }
 }
