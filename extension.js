@@ -1,13 +1,27 @@
 import { Workspace } from 'resource:///org/gnome/shell/ui/workspace.js'
-// import * as AltTab from 'resource:///org/gnome/shell/ui/altTab.js'
+import {
+  GroupCyclerPopup,
+  WindowCyclerPopup,
+  WindowSwitcherPopup,
+} from 'resource:///org/gnome/shell/ui/altTab.js'
+
 // import { UIWindowSelector, UIWindowSelectorWindow } from 'resource:///org/gnome/shell/ui/screenshot.js'
 // import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 const isOverviewWindow = Workspace.prototype._isOverviewWindow;
-// const getWindows = AltTab.getWindows;
+const groupGetWindows = GroupCyclerPopup.prototype._getWindows;
+const windowGetWindows = WindowCyclerPopup.prototype._getWindows;
+const windowSwitcherWindows = WindowSwitcherPopup.prototype._getWindowList;
+
 // const capture = UIWindowSelector.prototype.capture;
 
-export default class HideMinimized{
+
+function _filterWindows(windows) {
+  return windows.filter((w, i, a) => !w.minimized);
+}
+
+
+export default class HideMinimized {
   constructor() {
   }
 
@@ -19,11 +33,20 @@ export default class HideMinimized{
         meta = win.get_meta_window()
       return show && !meta.minimized;
     };
-    /*
-    AltTab.getWindows = (workspace) => {
-      const windows = getWindows(workspace);
-      return windows.filter((w, i, a) => !w.minimized);
+
+    WindowCyclerPopup.prototype._getWindows = function() {
+      return _filterWindows(windowGetWindows.bind(this)());
     };
+
+    GroupCyclerPopup.prototype._getWindows = function() {
+      return _filterWindows(groupGetWindows.bind(this)());
+    };
+
+    WindowSwitcherPopup.prototype._getWindowList = function() {
+      return _filterWindows(windowSwitcherWindows.bind(this)());
+    };
+
+    /*
     // Patched version of original function from:
     // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/ui/screenshot.js
     UIWindowSelector.prototype.capture = function() {
@@ -65,7 +88,9 @@ export default class HideMinimized{
 
   disable() {
     Workspace.prototype._isOverviewWindow = isOverviewWindow;
-    // AltTab.getWindows = getWindows;
+    WindowCyclerPopup.prototype._getWindows = windowGetWindows;
+    GroupCyclerPopup.prototype._getWindows = groupGetWindows;
+    WindowSwitcherPopup.prototype._getWindowList = windowSwitcherWindows;
     // UIWindowSelector.prototype.capture = capture;
   }
 }
