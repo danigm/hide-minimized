@@ -1,33 +1,52 @@
-const Config = imports.misc.config;
-const [major] = Config.PACKAGE_VERSION.split('.');
-const shellVersion = Number.parseInt(major);
+import { Workspace } from 'resource:///org/gnome/shell/ui/workspace.js'
+import {
+  GroupCyclerPopup,
+  WindowCyclerPopup,
+  WindowSwitcherPopup,
+} from 'resource:///org/gnome/shell/ui/altTab.js'
 
-const isOverviewWindow = imports.ui.workspace.Workspace.prototype._isOverviewWindow;
-const { Workspace } = imports.ui.workspace;
-const { altTab } = imports.ui;
-const { getWindows } = altTab;
-if(shellVersion >= 42) {
-  var capture = imports.ui.screenshot.UIWindowSelector.prototype.capture;
-  var { UIWindowSelector, UIWindowSelectorWindow } = imports.ui.screenshot;
-  var Main = imports.ui.main;
+// import { UIWindowSelector, UIWindowSelectorWindow } from 'resource:///org/gnome/shell/ui/screenshot.js'
+// import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+
+const isOverviewWindow = Workspace.prototype._isOverviewWindow;
+const groupGetWindows = GroupCyclerPopup.prototype._getWindows;
+const windowGetWindows = WindowCyclerPopup.prototype._getWindows;
+const windowSwitcherWindows = WindowSwitcherPopup.prototype._getWindowList;
+
+// const capture = UIWindowSelector.prototype.capture;
+
+
+function _filterWindows(windows) {
+  return windows.filter((w, i, a) => !w.minimized);
 }
 
-function init() {
-}
 
-function enable() {
-  Workspace.prototype._isOverviewWindow = (win) => {
-    const show = isOverviewWindow(win);
-    let meta = win;
-    if (win.get_meta_window)
-      meta = win.get_meta_window()
-    return show && !meta.minimized;
-  };
-  altTab.getWindows = (workspace) => {
-    const windows = getWindows(workspace);
-    return windows.filter((w, i, a) => !w.minimized);
-  };
-  if(shellVersion >= 42) {
+export default class HideMinimized {
+  constructor() {
+  }
+
+  enable() {
+    Workspace.prototype._isOverviewWindow = (win) => {
+      const show = isOverviewWindow(win);
+      let meta = win;
+      if (win.get_meta_window)
+        meta = win.get_meta_window()
+      return show && !meta.minimized;
+    };
+
+    WindowCyclerPopup.prototype._getWindows = function() {
+      return _filterWindows(windowGetWindows.bind(this)());
+    };
+
+    GroupCyclerPopup.prototype._getWindows = function() {
+      return _filterWindows(groupGetWindows.bind(this)());
+    };
+
+    WindowSwitcherPopup.prototype._getWindowList = function() {
+      return _filterWindows(windowSwitcherWindows.bind(this)());
+    };
+
+    /*
     // Patched version of original function from:
     // https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/ui/screenshot.js
     UIWindowSelector.prototype.capture = function() {
@@ -64,13 +83,14 @@ function enable() {
         this._layoutManager.addWindow(widget);
       }
     };
+    */
   }
-}
 
-function disable() {
-  Workspace.prototype._isOverviewWindow = isOverviewWindow;
-  altTab.getWindows = getWindows;
-  if(shellVersion >= 42) {
-    UIWindowSelector.prototype.capture = capture;
+  disable() {
+    Workspace.prototype._isOverviewWindow = isOverviewWindow;
+    WindowCyclerPopup.prototype._getWindows = windowGetWindows;
+    GroupCyclerPopup.prototype._getWindows = groupGetWindows;
+    WindowSwitcherPopup.prototype._getWindowList = windowSwitcherWindows;
+    // UIWindowSelector.prototype.capture = capture;
   }
 }
